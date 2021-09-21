@@ -1,9 +1,9 @@
 package com.springboot.logistics.api.controller;
 
-import java.util.List;
-
 import javax.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,10 +29,10 @@ public class ClienteController {
 	private ClienteRepository clienteRepository;
 
 	@GetMapping
-	public List<Cliente> listar() {
-		return clienteRepository.findAll();
+	public Page<Cliente> listar(Pageable pageable) {
+		return clienteRepository.findAll(pageable);
 	}
-	
+		
 	@GetMapping("/{clienteId}")
 	public ResponseEntity<Cliente> buscar(@PathVariable Long clienteId) {
 		return clienteRepository.findById(clienteId)

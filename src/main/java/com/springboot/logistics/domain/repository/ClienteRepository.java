@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.springboot.logistics.domain.model.Cliente;
 
-@Repository // antação que define que a interface (ClienteRepository neste caso) é um
+@Repository // anotação que define que a interface (ClienteRepository neste caso) é um
 			// componente do Spring porém com uma semântica muito bem definida, ou seja, é
 			// um repositório. Um repositório é o que gerencia uma entidade, neste caso é a entidade Cliente
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
