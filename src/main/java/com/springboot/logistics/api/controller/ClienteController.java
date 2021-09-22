@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.springboot.logistics.domain.model.Cliente;
 import com.springboot.logistics.domain.repository.ClienteRepository;
+import com.springboot.logistics.domain.service.ClienteService;
 
 import lombok.AllArgsConstructor;
 
@@ -27,6 +28,7 @@ import lombok.AllArgsConstructor;
 public class ClienteController {
 
 	private ClienteRepository clienteRepository;
+	private ClienteService clienteService;
 
 	@GetMapping
 	public Page<Cliente> listar(Pageable pageable) {
@@ -43,7 +45,7 @@ public class ClienteController {
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
 	public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
-		return clienteRepository.save(cliente);
+		return clienteService.salvar(cliente);
 	}
 	
 	@PutMapping("/{clienteId}")
@@ -53,7 +55,7 @@ public class ClienteController {
 		}
 		
 		cliente.setId(clienteId);
-		cliente = clienteRepository.save(cliente);
+		cliente = clienteService.salvar(cliente);
 		
 		return ResponseEntity.ok(cliente);
 	}
@@ -64,7 +66,7 @@ public class ClienteController {
 			return ResponseEntity.notFound().build();
 		}
 		
-		clienteRepository.deleteById(clienteId);
+		clienteService.excluir(clienteId);
 		
 		return ResponseEntity.noContent().build();
 	}

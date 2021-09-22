@@ -13,8 +13,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.springboot.logistics.domain.exception.Exception;
 
 import lombok.AllArgsConstructor;
 
@@ -45,6 +48,18 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		error.setCampos(campos);
 
 		return handleExceptionInternal(ex, error, headers, status, request);
+	}
+	
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Object> handleCliente(Exception cx, WebRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;		
+		
+		Error error = new Error();
+		error.setStatus(status.value());
+		error.setDataHora(LocalDateTime.now());
+		error.setTitulo(cx.getMessage());
+		
+		return handleExceptionInternal(cx, error, new HttpHeaders(), status, request);
 	}
 
 }
