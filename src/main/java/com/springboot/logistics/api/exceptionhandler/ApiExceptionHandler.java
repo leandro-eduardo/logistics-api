@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.springboot.logistics.domain.service.exceptions.ClienteExistenteException;
+import com.springboot.logistics.domain.service.exceptions.ClienteNaoEncontradoException;
+
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
@@ -17,8 +20,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.springboot.logistics.domain.exception.Exception;
-
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -30,36 +31,48 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	private MessageSource messageSource;
 
 	@Override
-	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
+	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		List<Error.Campo> campos = new ArrayList<>();
+		List<DetalhesErro.Campo> campos = new ArrayList<>();
 
-		for (ObjectError error : ex.getBindingResult().getAllErrors()) {
+		for (ObjectError error : exception.getBindingResult().getAllErrors()) {
 			String nome = ((FieldError) error).getField();
 			String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
-			campos.add(new Error.Campo(nome, mensagem));
+			campos.add(new DetalhesErro.Campo(nome, mensagem));
 		}
 
-		Error error = new Error();
-		error.setStatus(status.value());
-		error.setDataHora(LocalDateTime.now());
-		error.setTitulo("Um ou mais campos estão inválidos. Faça o preenchimento correto e tente novamente.");
-		error.setCampos(campos);
+		DetalhesErro erro = new DetalhesErro();
+		erro.setStatus(status.value());
+		erro.setDataHora(LocalDateTime.now());
+		erro.setTitulo("Um ou mais campos estão inválidos. Faça o preenchimento correto e tente novamente.");
+		erro.setCampos(campos);
 
-		return handleExceptionInternal(ex, error, headers, status, request);
+		return handleExceptionInternal(exception, erro, headers, status, request);
 	}
 	
-	@ExceptionHandler(Exception.class)
-	public ResponseEntity<Object> handleCliente(Exception cx, WebRequest request) {
+	@ExceptionHandler(ClienteExistenteException.class)
+	public ResponseEntity<Object> handleClienteExistenteException(ClienteExistenteException exception, WebRequest request) {
 		HttpStatus status = HttpStatus.BAD_REQUEST;		
 		
-		Error error = new Error();
-		error.setStatus(status.value());
-		error.setDataHora(LocalDateTime.now());
-		error.setTitulo(cx.getMessage());
+		DetalhesErro erro = new DetalhesErro();
+		erro.setStatus(status.value());
+		erro.setDataHora(LocalDateTime.now());
+		erro.setTitulo(exception.getMessage());
 		
-		return handleExceptionInternal(cx, error, new HttpHeaders(), status, request);
+		return handleExceptionInternal(exception, erro, new HttpHeaders(), status, request);
+	}
+
+	@ExceptionHandler(ClienteNaoEncontradoException.class)
+	public ResponseEntity<Object> handleClienteNaoEncontradoException(ClienteNaoEncontradoException exception, WebRequest request) {
+		HttpStatus status = HttpStatus.NOT_FOUND;		
+		
+		DetalhesErro erro = new DetalhesErro();
+		erro.setStatus(status.value());
+		erro.setDataHora(LocalDateTime.now());
+		erro.setTitulo(exception.getMessage());
+		
+		return handleExceptionInternal(exception, erro, new HttpHeaders(), status, request);
 	}
 
 }

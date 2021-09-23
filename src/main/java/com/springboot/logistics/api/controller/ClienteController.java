@@ -2,6 +2,10 @@ package com.springboot.logistics.api.controller;
 
 import javax.validation.Valid;
 
+import com.springboot.logistics.domain.model.Cliente;
+import com.springboot.logistics.domain.repository.ClienteRepository;
+import com.springboot.logistics.domain.service.ClienteService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.springboot.logistics.domain.model.Cliente;
-import com.springboot.logistics.domain.repository.ClienteRepository;
-import com.springboot.logistics.domain.service.ClienteService;
-
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -32,14 +32,12 @@ public class ClienteController {
 
 	@GetMapping
 	public Page<Cliente> listar(Pageable pageable) {
-		return clienteRepository.findAll(pageable);
+		return clienteService.listar(pageable);
 	}
 		
 	@GetMapping("/{clienteId}")
 	public ResponseEntity<Cliente> buscar(@PathVariable Long clienteId) {
-		return clienteRepository.findById(clienteId)
-				.map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+		return ResponseEntity.status(HttpStatus.OK).body(clienteService.buscar(clienteId));
 	}
 	
 	@PostMapping

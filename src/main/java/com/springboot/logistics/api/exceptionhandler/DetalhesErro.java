@@ -13,7 +13,7 @@ import lombok.Setter;
 @JsonInclude(Include.NON_NULL)
 @Getter
 @Setter
-public class Error {
+public class DetalhesErro {
 
 	private Integer status;
 	private LocalDateTime dataHora;

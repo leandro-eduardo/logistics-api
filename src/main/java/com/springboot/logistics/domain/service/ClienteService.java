@@ -1,11 +1,14 @@
 package com.springboot.logistics.domain.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.springboot.logistics.domain.exception.Exception;
 import com.springboot.logistics.domain.model.Cliente;
 import com.springboot.logistics.domain.repository.ClienteRepository;
+import com.springboot.logistics.domain.service.exceptions.ClienteExistenteException;
+import com.springboot.logistics.domain.service.exceptions.ClienteNaoEncontradoException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import lombok.AllArgsConstructor;
 
@@ -16,6 +19,15 @@ import lombok.AllArgsConstructor;
 public class ClienteService {
 
 	private ClienteRepository clienteRepository;
+
+	public Page<Cliente> listar(Pageable pageable) {
+		return clienteRepository.findAll(pageable);
+	}
+
+	public Cliente buscar(Long clienteId) {
+		return clienteRepository.findById(clienteId)
+				.orElseThrow(() -> new ClienteNaoEncontradoException("Cliente não encontrado"));
+	}
 
 	@Transactional // declara que este método deve ser executado dentro de uma transação, ou seja,
 					// se algo que estiver executando dentro deste método der errado, todas as
@@ -28,7 +40,7 @@ public class ClienteService {
 				.anyMatch(clienteExistente -> !clienteExistente.equals(cliente));
 		
 		if (emailExistente) {
-			throw new Exception("Já existe um cliente cadastrado com este e-mail.");
+			throw new ClienteExistenteException("Já existe um cliente cadastrado com este e-mail");
 		}
 		
 		return clienteRepository.save(cliente);
