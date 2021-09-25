@@ -35,13 +35,12 @@ public class ClienteService {
 					// operações dentro dessa transação que estão sendo feitas no banco de dados são
 					// descartadas (ou tudo é executado ou nada é executado quando persistimos dados
 					// no banco)
-	public Cliente incluir(Cliente cliente) {
-		boolean emailExistente = clienteRepository.findByEmail(cliente.getEmail()).stream()
-				.anyMatch(clienteExistente -> !clienteExistente.equals(cliente));
+	public void incluir(Cliente cliente) {
+		boolean emailExistente = clienteRepository.findByEmail(cliente.getEmail()).isPresent();
 		if (emailExistente) {
 			throw new ClienteExistenteException("Já existe um cliente cadastrado com este e-mail");
 		}
-		return clienteRepository.save(cliente);
+		clienteRepository.save(cliente);
 	}
 
 	@Transactional
