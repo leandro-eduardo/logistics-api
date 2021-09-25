@@ -1,11 +1,11 @@
 package com.springboot.logistics.domain.service.exceptions;
 
-public class ClienteExistenteException extends RuntimeException {
+public class RegisteredCustomerException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ClienteExistenteException(String message) {
+	public RegisteredCustomerException(String message) {
 		super(message);
 	}
-	
+
 }

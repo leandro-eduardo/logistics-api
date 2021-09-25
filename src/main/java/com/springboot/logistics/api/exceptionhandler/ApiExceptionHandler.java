@@ -4,8 +4,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.springboot.logistics.domain.service.exceptions.ClienteExistenteException;
-import com.springboot.logistics.domain.service.exceptions.ClienteNaoEncontradoException;
+import javax.servlet.http.HttpServletRequest;
+
+import com.springboot.logistics.domain.service.exceptions.CityNotFoundException;
+import com.springboot.logistics.domain.service.exceptions.CustomerNotFoundException;
+import com.springboot.logistics.domain.service.exceptions.RegisteredCityException;
+import com.springboot.logistics.domain.service.exceptions.RegisteredCustomerException;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -23,9 +27,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-@ControllerAdvice // essa anotação diz que a classe é um componente do Spring porém com um
-				  // propósito específico de tratar exceções de forma global, ou seja, para todos
-				  // os controladores da aplicação
+@ControllerAdvice
 public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
 	private MessageSource messageSource;
@@ -34,45 +36,83 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		List<DetalhesErro.Campo> campos = new ArrayList<>();
+		List<ErrorDetails.Field> fields = new ArrayList<>();
 
 		for (ObjectError error : exception.getBindingResult().getAllErrors()) {
 			String nome = ((FieldError) error).getField();
 			String mensagem = messageSource.getMessage(error, LocaleContextHolder.getLocale());
-			campos.add(new DetalhesErro.Campo(nome, mensagem));
+			fields.add(new ErrorDetails.Field(nome, mensagem));
 		}
 
-		DetalhesErro erro = new DetalhesErro();
-		erro.setStatus(status.value());
-		erro.setDataHora(LocalDateTime.now());
-		erro.setTitulo("Um ou mais campos estão inválidos. Faça o preenchimento correto e tente novamente.");
-		erro.setCampos(campos);
+		ErrorDetails error = new ErrorDetails();
+		error.setTimestamp(LocalDateTime.now());
+		error.setStatus(status.value());
+		error.setError(status.getReasonPhrase());
+		error.setMessage("one or more fields are invalid. fill in correctly and try again.");
+		error.setFields(fields);
 
-		return handleExceptionInternal(exception, erro, headers, status, request);
-	}
-	
-	@ExceptionHandler(ClienteExistenteException.class)
-	public ResponseEntity<Object> handleClienteExistenteException(ClienteExistenteException exception, WebRequest request) {
-		HttpStatus status = HttpStatus.BAD_REQUEST;		
-		
-		DetalhesErro erro = new DetalhesErro();
-		erro.setStatus(status.value());
-		erro.setDataHora(LocalDateTime.now());
-		erro.setTitulo(exception.getMessage());
-		
-		return handleExceptionInternal(exception, erro, new HttpHeaders(), status, request);
+		return handleExceptionInternal(exception, error, headers, status, request);
 	}
 
-	@ExceptionHandler(ClienteNaoEncontradoException.class)
-	public ResponseEntity<Object> handleClienteNaoEncontradoException(ClienteNaoEncontradoException exception, WebRequest request) {
-		HttpStatus status = HttpStatus.NOT_FOUND;		
-		
-		DetalhesErro erro = new DetalhesErro();
-		erro.setStatus(status.value());
-		erro.setDataHora(LocalDateTime.now());
-		erro.setTitulo(exception.getMessage());
-		
-		return handleExceptionInternal(exception, erro, new HttpHeaders(), status, request);
+	@ExceptionHandler(RegisteredCustomerException.class)
+	public ResponseEntity<Object> handleRegisteredCustomerException(RegisteredCustomerException exception,
+			HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+
+		ErrorDetails error = new ErrorDetails();
+		error.setTimestamp(LocalDateTime.now());
+		error.setStatus(status.value());
+		error.setError(status.getReasonPhrase());
+		error.setMessage(exception.getMessage());
+		error.setDeveloperMessage("http://error.logistics.com/400");
+		error.setPath(request.getRequestURI());
+
+		return ResponseEntity.status(status).body(error);
+	}
+
+	@ExceptionHandler(CustomerNotFoundException.class)
+	public ResponseEntity<Object> handleCustomerNotFoundException(CustomerNotFoundException exception,
+			WebRequest request) {
+		HttpStatus status = HttpStatus.NOT_FOUND;
+
+		ErrorDetails error = new ErrorDetails();
+		error.setTimestamp(LocalDateTime.now());
+		error.setStatus(status.value());
+		error.setError(status.getReasonPhrase());
+		error.setMessage(exception.getMessage());
+		error.setDeveloperMessage("http://error.logistics.com/404");
+
+		return handleExceptionInternal(exception, error, new HttpHeaders(), status, request);
+	}
+
+	@ExceptionHandler(RegisteredCityException.class)
+	public ResponseEntity<Object> handleRegisteredCityException(RegisteredCityException exception,
+			HttpServletRequest request) {
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+
+		ErrorDetails error = new ErrorDetails();
+		error.setTimestamp(LocalDateTime.now());
+		error.setStatus(status.value());
+		error.setError(status.getReasonPhrase());
+		error.setMessage(exception.getMessage());
+		error.setDeveloperMessage("http://error.logistics.com/400");
+		error.setPath(request.getRequestURI());
+
+		return ResponseEntity.status(status).body(error);
+	}
+
+	@ExceptionHandler(CityNotFoundException.class)
+	public ResponseEntity<Object> handleCityNotFoundException(CityNotFoundException exception, WebRequest request) {
+		HttpStatus status = HttpStatus.NOT_FOUND;
+
+		ErrorDetails error = new ErrorDetails();
+		error.setTimestamp(LocalDateTime.now());
+		error.setStatus(status.value());
+		error.setError(status.getReasonPhrase());
+		error.setMessage(exception.getMessage());
+		error.setDeveloperMessage("http://error.logistics.com/404");
+
+		return handleExceptionInternal(exception, error, new HttpHeaders(), status, request);
 	}
 
 }

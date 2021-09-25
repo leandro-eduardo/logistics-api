@@ -1,11 +1,11 @@
 package com.springboot.logistics.domain.service.exceptions;
 
-public class ClienteNaoEncontradoException extends RuntimeException {
+public class RegisteredCityException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public ClienteNaoEncontradoException(String message) {
+	public RegisteredCityException(String message) {
 		super(message);
 	}
-	
+
 }

@@ -13,18 +13,21 @@ import lombok.Setter;
 @JsonInclude(Include.NON_NULL)
 @Getter
 @Setter
-public class DetalhesErro {
+public class ErrorDetails {
 
+	private LocalDateTime timestamp;
 	private Integer status;
-	private LocalDateTime dataHora;
-	private String titulo;
-	private List<Campo> campos;
+	private String error;
+	private String message;
+	private String developerMessage;
+	private String path;
+	private List<Field> fields;
 
 	@AllArgsConstructor
 	@Getter
-	public static class Campo {
+	public static class Field {
 
-		private String nome;
-		private String mensagem;
+		private String name;
+		private String message;
 	}
 }
